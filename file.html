@@ -1,12 +1,54 @@
 <html>
 <head>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/Chart.js/0.2.0/Chart.min.js"></script>
 <script>
 $(document).ready(function () {
-  alert("hi");
+  setInterval(function () {
+    $.ajax({
+      dataType: 'json',
+      url: 'http://localhost:8080/stats'
+    }).done(function (data) {
+    
+      console.log(data);
+      
+      $('#procs').empty();
+      var total = 0;
+      $.each(data.proc, function () {
+          if (this.Name != '_Total')
+            total += this.PercentProcessorTime;
+      });
+
+      $.each(data.proc, function () {
+          $('#procs').append('<tr><td>' + this.Name + '</td><td>' + this.Caption + '</td><td>' + 100*this.PercentProcessorTime/total + '%</td><td>' + this.ThreadCount + '</td></tr>');
+      });
+    
+      var chartData = [ { value: data.processor, color:"#F7464A" },
+                        { value: 100-data.processor, color:"#E2EAE9" }];
+    
+      //Get context with jQuery - using jQuery's .get() method.
+      var ctx = $("#processor").get(0).getContext("2d");
+      //This will get the first returned node in the jQuery collection.
+      var myNewChart = new Chart(ctx).Doughnut(chartData,{animation : false});
+    
+      chartData = [ { value: data.totmem-data.memfree, color:"#F7464A" },
+                        { value: data.memfree, color:"#E2EAE9" }];
+    
+      //Get context with jQuery - using jQuery's .get() method.
+      ctx = $("#memory").get(0).getContext("2d");
+      //This will get the first returned node in the jQuery collection.
+      myNewChart = new Chart(ctx).Doughnut(chartData,{animation : false});
+
+    });
+  }, 1000);
 });
 </script>
 </head>
 <body>
+  <canvas id="processor" width="400" height="400"></canvas>
+  <canvas id="memory" width="400" height="400"></canvas>
+  <table id="procs">
+  
+  </table>
 </body>
 </html>
