@@ -1,9 +1,13 @@
 <html>
 <head>
+<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
+
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/Chart.js/0.2.0/Chart.min.js"></script>
+<script src="jquery.peity.js"></script>
 <script>
 $(document).ready(function () {
+
   setInterval(function () {
     $.ajax({
       dataType: 'json',
@@ -12,15 +16,25 @@ $(document).ready(function () {
     
       console.log(data);
       
-      $('#procs').empty();
-      var total = 0;
       $.each(data.proc, function () {
-          if (this.Name != '_Total')
-            total += this.PercentProcessorTime;
-      });
-
-      $.each(data.proc, function () {
-          $('#procs').append('<tr><td>' + this.Name + '</td><td>' + this.Caption + '</td><td>' + 100*this.PercentProcessorTime/total + '%</td><td>' + this.ThreadCount + '</td></tr>');
+        if (this.Name == '_Total')
+          return;
+      
+        if ($('#procs').find('#' + this.IDProcess).length > 0)
+        {
+          var usage = $('#procs').find('#' + this.IDProcess + ' .updating-chart').text().split(',');
+          usage.push(this.WorkingSet);
+          if (usage.length > 20)
+            usage.shift();
+          
+          $('#procs').find('#' + this.IDProcess).html('<td>' + this.Name + '</td><td><span class="updating-chart">' + usage.join(',') + '</span></td><td>' + this.ThreadCount + '</td>');
+          $("#procs").find('#' + this.IDProcess + ' .updating-chart').peity("line", { width: 64 });
+        }
+        else
+        {
+          $('#procs').append('<tr id=' + this.IDProcess + '><td>' + this.Name + '</td><td><span class="updating-chart">' + this.WorkingSet + '</span></td><td>' + this.ThreadCount + '</td></tr>');
+          $("#procs").find('#' + this.IDProcess + ' .updating-chart').peity("line", { width: 64 });
+        }
       });
     
       var chartData = [ { value: data.processor, color:"#F7464A" },
@@ -40,14 +54,14 @@ $(document).ready(function () {
       myNewChart = new Chart(ctx).Doughnut(chartData,{animation : false});
 
     });
-  }, 1000);
+  }, 10000);
 });
 </script>
 </head>
-<body>
-  <canvas id="processor" width="400" height="400"></canvas>
-  <canvas id="memory" width="400" height="400"></canvas>
-  <table id="procs">
+<body style="font-family: 'Montserrat', sans-serif; font-size: 80%; color:gray;">
+  <canvas id="processor" width="200" height="200"></canvas>
+  <canvas id="memory" width="200" height="200"></canvas>
+  <table id="procs" style="font-size: 80%">
   
   </table>
 </body>

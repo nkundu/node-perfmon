@@ -20,9 +20,9 @@ Wmi.connect(function(err, wmi) {
           stats['totmem'] = results[0].TotalVisibleMemorySize;
       });
       wmi.query("SELECT Name,BytesReceivedPersec,BytesSentPerSec,PacketsPerSec FROM Win32_PerfRawData_Tcpip_NetworkInterface", function(err, results) {
-          stats['network'] = results[0];
+          stats['network'] = results;
       });
-      wmi.query("SELECT Caption,ThreadCount,HandleCount,PrivateBytes,WorkingSet,PercentProcessorTime,PageFaultsPerSec,Timestamp_Sys100NS,IDProcess FROM Win32_PerfRawData_PerfProc_Process", function(err, results) {
+      wmi.query("SELECT ThreadCount,HandleCount,PrivateBytes,WorkingSet,PercentProcessorTime,PageFaultsPerSec,Timestamp_Sys100NS,IDProcess FROM Win32_PerfRawData_PerfProc_Process", function(err, results) {
           stats['proc'] = results;
       });
       
